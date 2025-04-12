@@ -1,0 +1,10 @@
+<div class="page-container">
+  <aside class="sidebar">Sidebar</aside>
+  <main class="main">
+    <div class="row">
+      <div *ngFor="let product of products" class="col-sm-6 col-lg-3">
+        <app-product-card [product]="product"></app-product-card>
+      </div>
+    </div>
+  </main>
+</div>

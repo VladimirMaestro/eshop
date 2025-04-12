@@ -1,0 +1,56 @@
+<div class="row">
+  <div class="col">
+    <img src="" alt="">
+  </div>
+  <div class="col">
+    <h1>{{ product?.name }}</h1>
+    <div>{{ product?.price }}</div>
+  </div>
+</div>
+<div class="row">
+  <div class="col">
+    <div class="new-comment-container">
+      <form [formGroup]="form">
+        <div class="mb-3">
+          <label for="fullName" class="form-label">Full name</label>
+          <input
+            type="text" class="form-control" id="fullName" formControlName="fullName"
+            [ngClass]="{ 'is-invalid': form.controls.fullName.touched && form.controls.fullName.invalid }">
+          <div class="invalid-feedback">
+            Please provide a valid full name.
+          </div>
+        </div>
+        <div class="mb-3">
+          <label for="comment" class="form-label">Comment</label>
+          <textarea
+            class="form-control" id="comment" rows="3" formControlName="comment"
+            [ngClass]="{ 'is-invalid': form.controls.comment.touched && form.controls.comment.invalid }">
+          </textarea>
+          <div class="invalid-feedback">
+            Please provide a valid comment.
+          </div>
+        </div>
+        <button class="btn btn-primary mb-3" (click)="addComment()">Add comment</button>
+      </form>
+    </div>
+    <div class="comments-container">
+      <div *ngFor="let comment of product?.comments" class="col">
+        <div class="card mb-4 rounded-3 shadow-sm">
+          <div class="card-header d-flex justify-content-between">
+            <h4 class="my-0 fw-normal">
+              {{ comment.author }} ({{ comment.createdAt }})
+            </h4>
+            <div class="actions">
+              <button class="btn btn-light">Like ({{comment.likes || 0}})</button>
+              <button class="btn btn-light">Dislike ({{comment.dislikes || 0}})</button>
+            </div>
+          </div>
+          <div class="card-body">
+            {{ comment.text }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

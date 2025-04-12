@@ -1,0 +1,12 @@
+.page-container {
+  display: flex;
+}
+
+.sidebar {
+  width: 200px;
+  min-width: 200px;
+}
+
+.main {
+  flex-grow: 1;
+}
