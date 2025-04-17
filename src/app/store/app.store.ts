@@ -20,7 +20,7 @@ export class AppStore {
       { id: '3', name: 'Third' } as Product,
       { id: '4', name: '4s' } as Product
     ],
-    page: Page.CATALOG
+    curentPage: Page.CATALOG
   };
   private stateSubject$: BehaviorSubject<AppState> = new BehaviorSubject<AppState>(this.state);
   public state$: Observable<any> = this.stateSubject$.asObservable();
@@ -82,6 +82,6 @@ export class AppStore {
     });
   }
   setCurrentPage(page: Page){
-    this.state.page=page;
+    this.state.curentPage=page;
   }
 }

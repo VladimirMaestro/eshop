@@ -22,7 +22,7 @@ export class AppComponent implements OnInit {
     ).subscribe((e: RouterEvent) => {
       const currentRoute = this.getDeepestChild(this.activatedRoute.snapshot.root);
       this.appStore.setCurrentPage(currentRoute.data['page']);
-    //  console.log('Current page:', currentRoute.data['page']);
+    //  console.log('Current page:', currentRoute.data['page']);test
     });
   }
 

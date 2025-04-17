@@ -3,5 +3,5 @@ import { Page } from './page';
 
 export interface AppState {
   products: Product[],
-  page: Page
+  curentPage: Page
 }
