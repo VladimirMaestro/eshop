@@ -5,11 +5,7 @@ import { Comment } from '../../models/comment';
 import { AppStore } from '../../store/app.store';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-
-interface CommentForm {
-  fullName: FormControl<string | null>;
-  comment: FormControl<string | null>;
-}
+import { CommentForm } from '../../models/comment-form';
 
 @Component({
   standalone: false,

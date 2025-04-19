@@ -1,7 +1,7 @@
 import { Product } from './product';
-import { Page } from './page';
+import { ProductsSelectionCriteria } from './selection-criteria';
 
 export interface AppState {
-  products: Product[],
-  curentPage: Page
+  products: Product[];
+  productsSelectionCriteria: ProductsSelectionCriteria;
 }

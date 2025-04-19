@@ -2,8 +2,6 @@ import { Component, inject } from '@angular/core';
 import { Product } from '../../models/product';
 import { AppStore } from '../../store/app.store';
 import { AppState } from '../../models/app-state';
-import { ActivatedRoute } from '@angular/router';
-
 
 @Component({
   standalone: false,

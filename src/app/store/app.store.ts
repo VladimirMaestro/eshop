@@ -3,11 +3,12 @@ import { Product } from '../models/product';
 import { Injectable } from '@angular/core'
 import { BehaviorSubject, map, Observable } from 'rxjs';
 import { Comment } from '../models/comment';
-import { Page } from '../models/page';
+import { ProductFilters } from '../models/products-filters';
 
 @Injectable()
 export class AppStore {
   private state: AppState = {
+    productsSelectionCriteria: { filters: {} },
     products: [
       {
         id: '1', name: 'First', price: 123.33, comments: [
@@ -19,8 +20,7 @@ export class AppStore {
       { id: '2', name: 'Second' } as Product,
       { id: '3', name: 'Third' } as Product,
       { id: '4', name: '4s' } as Product
-    ],
-    curentPage: Page.CATALOG
+    ]
   };
   private stateSubject$: BehaviorSubject<AppState> = new BehaviorSubject<AppState>(this.state);
   public state$: Observable<any> = this.stateSubject$.asObservable();
@@ -76,12 +76,13 @@ export class AppStore {
     this.updateProduct(newProduct);
   }
 
+  updateProductFilters(filters: Partial<ProductFilters>): void {
+    // TODO update product filters
+  }
+
   private getProductById(productId: string): Product | undefined {
     return this.state.products.find((product: Product) => {
       return product.id === productId;
     });
-  }
-  setCurrentPage(page: Page){
-    this.state.curentPage=page;
   }
 }
