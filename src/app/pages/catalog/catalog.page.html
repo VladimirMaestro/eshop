@@ -1,5 +1,23 @@
 <div class="page-container">
-  <aside class="sidebar">Sidebar</aside>
+  <aside class="sidebar">Sidebar
+<!--    <input class="form-control me-2" type="number" placeholder="prise min" aria-label="Search" >-->
+    <div class="input-group mb-3">
+      <span class="input-group-text">$min</span>
+      <input type="number" class="form-control">
+    </div>
+    <div class="input-group mb-3">
+      <span class="input-group-text">$max</span>
+      <input type="number" class="form-control">
+    </div>
+    <button type="button" class="btn btn-success">Apply filters</button>
+    <div class="input-group mb-3">
+      <div class="input-group-text">
+        <input class="form-check-input mt-0" type="checkbox" value="" aria-label="Checkbox for following text input">
+      </div>
+      <input type="number" class="form-control" aria-label="Text input with checkbox">
+    </div>
+
+  </aside>
   <main class="main">
     <div class="row">
       <div *ngFor="let product of products" class="col-sm-6 col-lg-3">

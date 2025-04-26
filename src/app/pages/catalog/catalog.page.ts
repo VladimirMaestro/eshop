@@ -17,4 +17,8 @@ export class CatalogPage {
       this.products = state.products
     })
   }
+
+  removeDecimals(input: HTMLInputElement): void {
+    input.value = input.value.replace(/\.|,|-/g, '');
+  }
 }

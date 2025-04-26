@@ -8,7 +8,7 @@ import { ProductFilters } from '../models/products-filters';
 @Injectable()
 export class AppStore {
   private state: AppState = {
-    productsSelectionCriteria: { filters: {} },
+    productsSelectionCriteria: { filters: { ratingMin: 3, priceMin: 343, query: 'OldQueryString' } },
     products: [
       {
         id: '1', name: 'First', price: 123.33, comments: [
@@ -77,7 +77,10 @@ export class AppStore {
   }
 
   updateProductFilters(filters: Partial<ProductFilters>): void {
-    // TODO update product filters
+    const newFilters: ProductFilters = { ...this.state.productsSelectionCriteria.filters, ...filters };
+    this.state = { ...this.state, productsSelectionCriteria: { ...this.state.productsSelectionCriteria, filters: newFilters } };
+    this.stateSubject$.next(this.state);
+    console.log("state", this.state);
   }
 
   private getProductById(productId: string): Product | undefined {
