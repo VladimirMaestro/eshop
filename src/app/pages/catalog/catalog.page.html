@@ -3,13 +3,13 @@
 <!--    <input class="form-control me-2" type="number" placeholder="prise min" aria-label="Search" >-->
     <div class="input-group mb-3">
       <span class="input-group-text">$min</span>
-      <input type="number" class="form-control">
+      <input  name="priceMin" [(ngModel)]="priceMin"  #priceMinInput type="text" class="form-control" (beforeinput)="onBeforeInput('min',priceMinInput)" (input)="onPriceRangeInput('min',priceMinInput)">
     </div>
     <div class="input-group mb-3">
       <span class="input-group-text">$max</span>
-      <input type="number" class="form-control">
+      <input  name="priceMax" [(ngModel)]="priceMax" #priceMaxInput type="text" class="form-control" (beforeinput)="onBeforeInput('min',priceMaxInput)" (input)="onPriceRangeInput('min',priceMaxInput)">
     </div>
-    <button type="button" class="btn btn-success">Apply filters</button>
+    <button type="button" (click)="applyPriceMinMax()" class="btn btn-success">Apply filters</button>
     <div class="input-group mb-3">
       <div class="input-group-text">
         <input class="form-check-input mt-0" type="checkbox" value="" aria-label="Checkbox for following text input">
