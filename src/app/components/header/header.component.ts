@@ -18,7 +18,8 @@ export class HeaderComponent {
     //  this.filtersBadges = state.productsSelectionCriteria.filters;
 
       // @ts-ignore
-      this.filtersBadges = Object.values(state.productsSelectionCriteria.filters)
+      this.filtersBadges = Object.keys(state.productsSelectionCriteria.filters)
+      console.log("header",this.filtersBadges)
     })
   }
 
