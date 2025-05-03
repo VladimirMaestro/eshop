@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { AppStore } from '../../store/app.store';
 import { ProductFilters } from '../../models/products-filters';
+import { AppState } from '../../models/app-state';
 
 @Component({
   standalone: false,
@@ -10,6 +11,16 @@ import { ProductFilters } from '../../models/products-filters';
 export class HeaderComponent {
   private appStore: AppStore = inject(AppStore);
   public queryString: string = '';
+  public filtersBadges:[]=[];
+
+  ngOnInit(): void {
+    this.appStore.state$.subscribe((state: AppState) => {
+    //  this.filtersBadges = state.productsSelectionCriteria.filters;
+
+      // @ts-ignore
+      this.filtersBadges = Object.values(state.productsSelectionCriteria.filters)
+    })
+  }
 
   applyQueryString(): void {
     const filters: Partial<ProductFilters> = {

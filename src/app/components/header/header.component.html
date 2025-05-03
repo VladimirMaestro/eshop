@@ -2,6 +2,14 @@
   <div class="container-xl">
     <a class="navbar-brand" href="#">EShop</a>
   </div>
+  <span class="badge text-bg-info">Info</span>
+
+  <div class="row">
+    <div *ngFor="let filtersBadge of filtersBadges" class="col-sm-6 col-lg-3">
+      <span [filtersBadge]="filtersBadge" class="badge text-bg-info">Info</span>
+    </div>
+  </div>
+
   <div>
     <nav class="navbar bg-body-tertiary">
       <div class="container-fluid">

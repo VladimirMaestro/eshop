@@ -9,13 +9,20 @@
       <span class="input-group-text">$max</span>
       <input  name="priceMax" [(ngModel)]="priceMax" #priceMaxInput type="text" class="form-control" (beforeinput)="onBeforeInput('min',priceMaxInput)" (input)="onPriceRangeInput('min',priceMaxInput)">
     </div>
-    <button type="button" (click)="applyPriceMinMax()" class="btn btn-success">Apply filters</button>
+
     <div class="input-group mb-3">
-      <div class="input-group-text">
-        <input class="form-check-input mt-0" type="checkbox" value="" aria-label="Checkbox for following text input">
-      </div>
-      <input type="number" class="form-control" aria-label="Text input with checkbox">
+      <span class="input-group-text">rating min</span>
+      <input  name="ratingMin" [(ngModel)]="ratingMin" #ratingMinInput type="number"
+              min="1"
+              max="5"
+              step="1"
+              required
+              class="form-control" (beforeinput)="onBeforeInput('min',ratingMinInput)" (input)="onPriceRangeInput('min',ratingMinInput)">
     </div>
+
+
+    <button type="button" (click)="applyPriceMinMax()" class="btn btn-success">Apply filters</button>
+
 
   </aside>
   <main class="main">

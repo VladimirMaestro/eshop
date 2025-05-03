@@ -17,6 +17,8 @@ export class CatalogPage {
   private appStore: AppStore = inject(AppStore);
   public priceMin: string = '';
   public priceMax: string = '';
+ // public ratingMin: string = '';
+  public ratingMin: number = 1;
   private prevValues: { [key: string]: PriceInputStatus } = {};
   public products: Product[] = [];
 
@@ -24,6 +26,7 @@ export class CatalogPage {
     const filters: Partial<ProductFilters> = {
       priceMin: Number(this.priceMin),
       priceMax: Number(this.priceMax),
+      ratingMin: Number(this.ratingMin),
     };
     this.appStore.updateProductFilters(filters);
   }
