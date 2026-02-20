@@ -1,0 +1,17 @@
+.page-container {
+  display: flex;
+}
+
+.sidebar {
+  width: 200px;
+  min-width: 200px;
+}
+
+.main {
+  flex-grow: 1;
+}
+
+.remove-filter-btn {
+  padding-left: 10px;
+  cursor: pointer;
+}

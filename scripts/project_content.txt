@@ -1,0 +1,983 @@
+// File: ..\coffee-machine\hex\application\coffee-machine.ts
+// ----------------------------------------------------------------------
+import { WaterContainer } from "./ports/out/water-container";
+import { BeanContainer } from "./ports/out/bean-container";
+import { Grinder } from "../domain/grinder";
+import { Heater } from "../domain/heater";
+import { CoffeeReceiver } from "./ports/out/coffee-receiver";
+import { Recipe } from "../domain/recipe";
+import { DomainError } from "../domain/errors/errors";
+import { Coffee } from "../domain/coffee";
+
+export class CoffeeMachine {
+    constructor(
+        private readonly waterContainer: WaterContainer,
+        private readonly beanContainer: BeanContainer,
+        private readonly grinder: Grinder,
+        private readonly heater: Heater,
+        private readonly receiver: CoffeeReceiver
+    ) {}
+
+    prepare(recipe: Recipe): void {
+        console.log('[Machine] Starting coffee preparation');
+
+        try {
+            console.log('[Machine] Taking water from water tank');
+            const water = this.waterContainer.take(recipe.waterAmountMl);
+
+            console.log('[Machine] Taking coffee beans from bean container');
+            const beans = this.beanContainer.take(recipe.coffeeBeansAmountGrams);
+
+            console.log('[Machine] Grinding coffee beans');
+            const groundCoffee = this.grinder.grind(beans);
+
+            console.log('[Machine] Heating water');
+            const hotWater = this.heater.heat(water, recipe.targetTemperatureC);
+
+            console.log('[Machine] Extracting coffee');
+            const strength = groundCoffee.amountGrams / hotWater.amountMl;
+
+            const coffee = new Coffee(
+                hotWater.amountMl,
+                hotWater.temperatureC,
+                strength
+            );
+
+            console.log('[Machine] Sending coffee to receiver');
+            this.receiver.receive(coffee);
+
+            console.log('[Machine] Coffee preparation finished');
+        } catch (error) {
+            if (error instanceof DomainError) {
+                console.log('[Machine] Domain error occurred:', error.message);
+                throw error;
+            }
+            console.log('[Machine] Unexpected error occurred');
+            throw error;
+        }
+    }
+}
+
+
+// File: ..\coffee-machine\hex\application\ports\out\bean-container.ts
+// ----------------------------------------------------------------------
+import { CoffeeBeans } from "../../../domain/coffee-beans";
+
+export interface BeanContainer {
+    take(amountGrams: number): CoffeeBeans;
+    add(other: CoffeeBeans): void;
+}
+
+
+// File: ..\coffee-machine\hex\application\ports\out\coffee-receiver.ts
+// ----------------------------------------------------------------------
+import { Coffee } from "../../../domain/coffee";
+
+export interface CoffeeReceiver {
+    receive(coffee: Coffee): void;
+}
+
+
+// File: ..\coffee-machine\hex\application\ports\out\water-container.ts
+// ----------------------------------------------------------------------
+import { Water } from "../../../domain/water";
+
+export interface WaterContainer {
+    take(amountMl: number): Water;
+    add(other: Water): void;
+}
+
+
+// File: ..\coffee-machine\hex\domain\coffee-beans.ts
+// ----------------------------------------------------------------------
+import { InvalidCoffeeBeansError } from "./errors/errors";
+
+export class CoffeeBeans {
+    public readonly amountGrams: number = 0;
+
+    constructor(amountGrams: number) {
+        if (amountGrams < 0) {
+            throw new InvalidCoffeeBeansError('amount cannot be negative');
+        }
+        this.amountGrams = amountGrams;
+    }
+}
+
+
+// File: ..\coffee-machine\hex\domain\coffee.ts
+// ----------------------------------------------------------------------
+import { InvalidCoffeeError } from "./errors/errors";
+
+export class Coffee {
+    constructor(
+        public readonly amountMl: number,
+        public readonly temperatureC: number,
+        public readonly strength: number
+    ) {
+        if (amountMl <= 0) {
+            throw new InvalidCoffeeError('amount must be positive');
+        }
+        if (temperatureC < 0) {
+            throw new InvalidCoffeeError('temperature cannot be negative');
+        }
+        if (strength <= 0) {
+            throw Error('Coffee strength must be positive');
+        }
+    }
+}
+
+
+// File: ..\coffee-machine\hex\domain\errors\errors.ts
+// ----------------------------------------------------------------------
+export abstract class DomainError extends Error {
+    protected constructor(message: string) {
+        super(message);
+        this.name = (this.constructor as any).name;
+    }
+}
+
+export abstract class DomainValidationError extends DomainError {
+    protected constructor(message: string) {
+        super(message);
+    }
+}
+
+export class InvalidCoffeeError extends DomainValidationError {
+    constructor(message: string) {
+        super(`[Invalid Coffee]: ${message}`);
+    }
+}
+
+export class InvalidWaterError extends DomainValidationError {
+    constructor(message: string) {
+        super(`[Invalid Water]: ${message}`);
+    }
+}
+
+export class InvalidCoffeeBeansError extends DomainValidationError {
+    constructor(message: string) {
+        super(`[Invalid CoffeeBeans]: ${message}`);
+    }
+}
+
+export class NotEnoughWaterError extends DomainError {
+    constructor(requested: number, available: number) {
+        super(
+            `Not enough water: requested ${requested} ml, available ${available} ml`
+        );
+    }
+}
+
+export class NotEnoughBeansError extends DomainError {
+    constructor(requested: number, available: number) {
+        super(
+            `Not enough coffee beans: requested ${requested} g, available ${available} g`
+        );
+    }
+}
+
+export class InvalidWaterAmountError extends DomainValidationError {
+    constructor(amount: number) {
+        super(`Invalid water amount: ${amount} ml`);
+    }
+}
+
+export class InvalidCoffeeBeansAmountError extends DomainValidationError {
+    constructor(amount: number) {
+        super(`Invalid coffee beans amount: ${amount} g`);
+    }
+}
+
+export class InvalidTargetTemperatureError extends DomainValidationError {
+    constructor(temp: number) {
+        super(`Invalid target temperature: ${temp} °C`);
+    }
+}
+
+export class InvalidGroundCoffeeError extends DomainValidationError {
+    constructor(message: string) {
+        super(`Invalid ground coffee: ${message}`);
+    }
+}
+
+
+// File: ..\coffee-machine\hex\domain\grinder.ts
+// ----------------------------------------------------------------------
+import { CoffeeBeans } from "./coffee-beans";
+import { GroundCoffee } from "./ground-coffee";
+
+export class Grinder {
+    grind(beans: CoffeeBeans): GroundCoffee {
+        console.log(`[Grinder] Grinding ${beans.amountGrams} g of coffee beans`);
+        return new GroundCoffee(beans.amountGrams);
+    }
+}
+
+
+// File: ..\coffee-machine\hex\domain\ground-coffee.ts
+// ----------------------------------------------------------------------
+import { InvalidGroundCoffeeError } from "../errors";
+
+export  class GroundCoffee {
+    constructor(
+        public readonly amountGrams: number
+    ) {
+        if (amountGrams <= 0) {
+            throw new InvalidGroundCoffeeError('amount must be positive');
+        }
+    }
+}
+
+
+// File: ..\coffee-machine\hex\domain\heater.ts
+// ----------------------------------------------------------------------
+import { Water } from "./water";
+
+export  class Heater {
+    heat(water: Water, targetTemperatureC: number): Water {
+        console.log(`[Heater] Heating water to ${targetTemperatureC} °C`);
+        return new Water(water.amountMl, targetTemperatureC);
+    }
+}
+
+
+// File: ..\coffee-machine\hex\domain\recipe.ts
+// ----------------------------------------------------------------------
+import { InvalidCoffeeBeansAmountError, InvalidTargetTemperatureError, InvalidWaterAmountError } from "./errors/errors";
+
+export class Recipe {
+    constructor(
+        public readonly waterAmountMl: number,
+        public readonly targetTemperatureC: number,
+        public readonly coffeeBeansAmountGrams: number
+    ) {
+        if (waterAmountMl <= 0) {
+            throw new InvalidWaterAmountError(waterAmountMl);
+        }
+        if (coffeeBeansAmountGrams <= 0) {
+            throw new InvalidCoffeeBeansAmountError(coffeeBeansAmountGrams);
+        }
+        if (targetTemperatureC < 60 || targetTemperatureC > 100) {
+            throw new InvalidTargetTemperatureError(targetTemperatureC);
+        }
+    }
+}
+
+
+// File: ..\coffee-machine\hex\domain\water.ts
+// ----------------------------------------------------------------------
+import { InvalidWaterError } from "./errors/errors";
+
+export  class Water {
+    public readonly amountMl: number = 0;
+    public readonly temperatureC: number = 0;
+
+    constructor(amountMl: number, temperatureC: number) {
+        if (amountMl <= 0) {
+            throw new InvalidWaterError('amount must be positive');
+        }
+        if (temperatureC < 0 || temperatureC > 100) {
+            throw new InvalidWaterError('temperature must be between 0 and 100 °C');
+        }
+        this.amountMl = amountMl;
+        this.temperatureC = temperatureC;
+    }
+}
+
+
+// File: ..\coffee-machine\hex\infrastructure\cup.ts
+// ----------------------------------------------------------------------
+import { Coffee } from "../domain/coffee";
+import { CoffeeReceiver } from "../application/ports/out/coffee-receiver";
+
+export class Cup implements CoffeeReceiver {
+    receive(coffee: Coffee): void {
+        console.log('☕ Coffee is ready!');
+        console.log(`Amount: ${coffee.amountMl} ml`);
+        console.log(`Temperature: ${coffee.temperatureC} °C`);
+        console.log(`Strength: ${coffee.strength.toFixed(2)}`);
+    }
+}
+
+
+// File: ..\coffee-machine\hex\infrastructure\plastic-bean-container.ts
+// ----------------------------------------------------------------------
+import { CoffeeBeans } from "../domain/coffee-beans";
+import { NotEnoughBeansError } from "../domain/errors/errors";
+
+export class PlasticBeanContainer {
+    private maxAmountGrams: number = 500;
+    private beans: CoffeeBeans = new CoffeeBeans(0);
+
+    take(amountGrams: number): CoffeeBeans {
+        console.log(`[BeanContainer] Requesting ${amountGrams} g of beans`);
+        if (amountGrams > this.beans.amountGrams) {
+            throw new NotEnoughBeansError(
+                amountGrams,
+                this.beans.amountGrams
+            );
+        }
+        this.beans = new CoffeeBeans(this.beans.amountGrams - amountGrams);
+        console.log(`[BeanContainer] Remaining beans: ${this.beans.amountGrams} g`);
+        return new CoffeeBeans(amountGrams);
+    }
+
+    add(other: CoffeeBeans): void {
+        console.log(`[BeanContainer] Adding ${other.amountGrams} g of beans`);
+        const availableSpace = this.maxAmountGrams - this.beans.amountGrams;
+        const amountGramsToAdd = Math.min(other.amountGrams, availableSpace);
+        this.beans = new CoffeeBeans(this.beans.amountGrams + amountGramsToAdd);
+        console.log(`[BeanContainer] Bean level: ${this.beans.amountGrams} g`);
+    }
+}
+
+
+// File: ..\coffee-machine\hex\infrastructure\water-tank.ts
+// ----------------------------------------------------------------------
+import { WaterContainer } from "../application/ports/out/water-container";
+import { Water } from "../domain/water";
+import { NotEnoughWaterError } from "../domain/errors/errors";
+
+export class WaterTank implements WaterContainer {
+    private maxAmountMl: number = 1500;
+    private water: Water = new Water(0, 0);
+
+    take(amountMl: number): Water {
+        console.log(`[WaterTank] Requesting ${amountMl} ml of water`);
+
+        if (amountMl > this.water.amountMl) {
+            throw new NotEnoughWaterError(
+                amountMl,
+                this.water.amountMl
+            );
+        }
+
+        this.water = new Water(
+            this.water.amountMl - amountMl,
+            this.water.temperatureC
+        );
+
+        console.log(`[WaterTank] Remaining water: ${this.water.amountMl} ml`);
+
+        return new Water(amountMl, this.water.temperatureC);
+    }
+
+    add(other: Water): void {
+        console.log(`[WaterTank] Adding ${other.amountMl} ml of water`);
+        const availableSpace = this.maxAmountMl - this.water.amountMl;
+        const amountMlToAdd = Math.min(other.amountMl, availableSpace);
+
+        const resultAmountMl = this.water.amountMl + amountMlToAdd;
+        const mixedResultTemp =
+            (this.water.amountMl * this.water.temperatureC +
+                other.amountMl * other.temperatureC) / resultAmountMl;
+
+        this.water = new Water(resultAmountMl, mixedResultTemp);
+
+        console.log(
+            `[WaterTank] Water level: ${this.water.amountMl} ml at ${this.water.temperatureC.toFixed(
+                1
+            )} °C`
+        );
+    }
+}
+
+
+// File: ..\coffee-machine\hex\main.ts
+// ----------------------------------------------------------------------
+
+
+
+
+
+
+// UI
+/*
+  UI — пошаговый
+  пользователь может:
+    - сначала выбрать тип
+    - потом воду
+    - потом температуру
+  Builder — это адаптер между человеческим вводом и строгим доменом. Терпит «полусобранные» состояния.
+
+  👉 Выбрать тип напитка
+  👉 Настроить параметры (крепость / вода)
+  👉 Нажать «Приготовить»
+*/
+// class RecipeBuilder {
+//     private waterAmountMl: number = null;
+//     private targetTemperatureC: number = null;
+//     private coffeeBeansAmountGrams: number = null;
+//
+//     setWaterAmountMl(amountMl: number): this {
+//         this.waterAmountMl = amountMl;
+//         return this;
+//     }
+//
+//     setTargetTemperatureC(tempC: number): this {
+//         this.targetTemperatureC = tempC;
+//         return this;
+//     }
+//
+//     setCoffeeBeansAmountGrams(amountGrams: number): this {
+//         this.coffeeBeansAmountGrams = amountGrams;
+//         return this;
+//     }
+//
+//     build(): Recipe {
+//         if (
+//             this.waterAmountMl === null ||
+//             this.targetTemperatureC === null ||
+//             this.coffeeBeansAmountGrams === null
+//         ) {
+//             throw new Error('Recipe is incomplete');
+//         }
+//
+//         const recipe: Recipe = new Recipe(
+//             this.waterAmountMl,
+//             this.targetTemperatureC,
+//             this.coffeeBeansAmountGrams
+//         );
+//         this.reset();
+//         return recipe;
+//     }
+//
+//     private reset(): void {
+//         this.waterAmountMl = null;
+//         this.targetTemperatureC = null;
+//         this.coffeeBeansAmountGrams = null;
+//     }
+// }
+//
+// interface StepRangeParams {
+//     min: number;
+//     max: number;
+//     step: number;
+//     initial: number;
+// }
+//
+// class StepRange {
+//     private value: number;
+//     private readonly min: number;
+//     private readonly max: number;
+//     private readonly step: number;
+//
+//     constructor(params: StepRangeParams) {
+//         this.min = params.min;
+//         this.max = params.max;
+//         this.step = params.step;
+//         this.value = this.clamp(params.initial);
+//     }
+//
+//     increase(): void {
+//         this.value = this.clamp(this.value + this.step);
+//     }
+//
+//     decrease(): void {
+//         this.value = this.clamp(this.value - this.step);
+//     }
+//
+//     get current(): number {
+//         return this.value;
+//     }
+//
+//     private clamp(value: number): number {
+//         return Math.max(this.min, Math.min(this.max, value));
+//     }
+// }
+//
+// class EspressoConfigurator {
+//     private readonly strength: StepRange = new StepRange({
+//         min: 1,
+//         max: 7,
+//         step: 1,
+//         initial: 4
+//     });
+//     private readonly water: StepRange = new StepRange({
+//         min: 80,
+//         max: 160,
+//         step: 20,
+//         initial: 120
+//     });
+//
+//     constructor(private readonly builder: RecipeBuilder) {
+//         this.sync();
+//     }
+//
+//     increaseStrength(): void {
+//         this.strength.increase();
+//         this.sync();
+//     }
+//
+//     decreaseStrength(): void {
+//         this.strength.decrease();
+//         this.sync();
+//     }
+//
+//     increaseWater(): void {
+//         this.water.increase();
+//         this.sync();
+//     }
+//
+//     decreaseWater(): void {
+//         this.water.decrease();
+//         this.sync();
+//     }
+//
+//     private sync(): void {
+//         this.builder
+//             .setCoffeeBeansAmountGrams(this.mapStrengthToBeans(this.strength.current))
+//             .setWaterAmountMl(this.water.current);
+//     }
+//
+//     private mapStrengthToBeans(level: number): number {
+//         // простое соответствие UI → домен
+//         return 12 + level * 2; // 1→14g, 7→26g
+//     }
+// }
+//
+//
+// class AmericanoConfigurator {
+//     private readonly strength: StepRange = new StepRange({
+//         min: 1,
+//         max: 5,
+//         step: 1,
+//         initial: 3
+//     });
+//     private readonly water: StepRange = new StepRange({
+//         min: 120,
+//         max: 300,
+//         step: 30,
+//         initial: 180
+//     });
+//
+//     constructor(private readonly builder: RecipeBuilder) {
+//         this.syncWithRecipeBuilder();
+//     }
+//
+//     increaseStrength(): void {
+//         this.strength.increase();
+//         this.syncWithRecipeBuilder();
+//     }
+//
+//     decreaseStrength(): void {
+//         this.strength.decrease();
+//         this.syncWithRecipeBuilder();
+//     }
+//
+//     increaseWater(): void {
+//         this.water.increase();
+//         this.syncWithRecipeBuilder();
+//     }
+//
+//     decreaseWater(): void {
+//         this.water.decrease();
+//         this.syncWithRecipeBuilder();
+//     }
+//
+//     private syncWithRecipeBuilder(): void {
+//         this.builder
+//             .setCoffeeBeansAmountGrams(this.mapStrengthToBeans(this.strength.current))
+//             .setWaterAmountMl(this.water.current);
+//     }
+//
+//     private mapStrengthToBeans(level: number): number {
+//         return 10 + level * 3;
+//     }
+// }
+//
+//
+// class ControlPanel {
+//     private builder: RecipeBuilder;
+//     private configurator: any;
+//
+//     constructor(private readonly coffeeMachine: CoffeeMachine) {}
+//
+//     createEspresso(): void {
+//         console.log('[UI] Espresso button pressed');
+//         this.builder = new RecipeBuilder();
+//         this.builder.setTargetTemperatureC(80);
+//         this.configurator = new EspressoConfigurator(this.builder);
+//     }
+//
+//     createAmericano(): void {
+//         console.log('[UI] Americano button pressed');
+//         this.builder = new RecipeBuilder();
+//         this.builder.setTargetTemperatureC(80);
+//         this.configurator = new AmericanoConfigurator(this.builder);
+//     }
+//
+//     increaseWater(): void {
+//         console.log('[UI] Increase water');
+//         this.configurator.increaseWater();
+//     }
+//
+//     decreaseWater(): void {
+//         console.log('[UI] Decrease water');
+//         this.configurator.decreaseWater();
+//     }
+//
+//     increaseStrength(): void {
+//         console.log('[UI] Increase strength');
+//         this.configurator.increaseStrength();
+//     }
+//
+//     decreaseStrength(): void {
+//         console.log('[UI] Decrease strength');
+//         this.configurator.decreaseStrength();
+//     }
+//
+//     prepareCoffee(): void {
+//         console.log('[UI] Prepare coffee button pressed');
+//         try {
+//             const recipe = this.builder.build();
+//             this.coffeeMachine.prepare(recipe);
+//         } catch (error) {
+//             if (error instanceof DomainValidationError) {
+//                 console.log('[UI] Invalid recipe:', error.message);
+//                 return;
+//             }
+//             if (error instanceof DomainError) {
+//                 console.log('[UI] Cannot prepare coffee:', error.message);
+//                 return;
+//             }
+//             throw error;
+//         }
+//     }
+// }
+
+
+// --- Infrastructure / composition root ---
+
+// Containers (физическое состояние машины)
+import { ControlPanel } from "./ui/control-panel";
+import { CoffeeMachine } from "./application/coffee-machine";
+import { WaterContainer } from "./application/ports/out/water-container";
+import { WaterTank } from "./infrastructure/water-tank";
+import { Grinder } from "./domain/grinder";
+import { Heater } from "./domain/heater";
+import { CoffeeReceiver } from "./application/ports/out/coffee-receiver";
+import { Cup } from "./infrastructure/cup";
+import { BeanContainer } from "./application/ports/out/bean-container";
+import { PlasticBeanContainer } from "./infrastructure/plastic-bean-container";
+import { CoffeeBeans } from "./domain/coffee-beans";
+import { Water } from "./domain/water";
+
+const waterTank = new WaterTank();
+const cup = new Cup();
+const plasticBeanContainer = new PlasticBeanContainer();
+
+// Наполняем машину ресурсами
+waterTank.add(new Water(1000, 20));        // 1 литр воды, комнатная температура
+plasticBeanContainer.add(new CoffeeBeans(300));   // 300 г зёрен
+
+
+// CoffeeMachine dependencies
+const grinder = new Grinder();
+const heater = new Heater();
+const coffeeReceiver: CoffeeReceiver = cup;
+const waterContainer: WaterContainer = waterTank;
+const beanContainer: BeanContainer = plasticBeanContainer;
+
+const coffeeMachine = new CoffeeMachine(
+    waterContainer,
+    beanContainer,
+    grinder,
+    heater,
+    coffeeReceiver
+);
+
+// UI
+const controlPanel = new ControlPanel(coffeeMachine);
+
+
+// --- User scenario: Espresso ---
+console.log('👉 User selects ESPRESSO');
+controlPanel.createEspresso();
+
+// Пользователь усиливает крепость (кнопка "+")
+console.log('👉 Increase strength');
+controlPanel.increaseStrength();
+controlPanel.increaseStrength();
+
+// Пользователь уменьшает воду
+console.log('👉 Decrease water');
+controlPanel.decreaseWater();
+
+// Нажимает "Prepare"
+console.log('👉 Prepare coffee');
+controlPanel.prepareCoffee();
+
+
+
+// File: ..\coffee-machine\hex\ui\americano-configurator.ts
+// ----------------------------------------------------------------------
+import { RecipeBuilder } from './recipe-builder';
+import { StepRange } from './step-range';
+
+export class AmericanoConfigurator {
+  private readonly strength: StepRange = new StepRange({
+    min: 1,
+    max: 5,
+    step: 1,
+    initial: 3
+  });
+  private readonly water: StepRange = new StepRange({
+    min: 120,
+    max: 300,
+    step: 30,
+    initial: 180
+  });
+
+  constructor(private readonly builder: RecipeBuilder) {
+    this.syncWithRecipeBuilder();
+  }
+
+  increaseStrength(): void {
+    this.strength.increase();
+    this.syncWithRecipeBuilder();
+  }
+
+  decreaseStrength(): void {
+    this.strength.decrease();
+    this.syncWithRecipeBuilder();
+  }
+
+  increaseWater(): void {
+    this.water.increase();
+    this.syncWithRecipeBuilder();
+  }
+
+  decreaseWater(): void {
+    this.water.decrease();
+    this.syncWithRecipeBuilder();
+  }
+
+  private syncWithRecipeBuilder(): void {
+    this.builder
+      .setCoffeeBeansAmountGrams(this.mapStrengthToBeans(this.strength.current))
+      .setWaterAmountMl(this.water.current);
+  }
+
+  private mapStrengthToBeans(level: number): number {
+    return 10 + level * 3;
+  }
+}
+
+// File: ..\coffee-machine\hex\ui\control-panel.ts
+// ----------------------------------------------------------------------
+import { RecipeBuilder } from './recipe-builder';
+import { EspressoConfigurator } from './espresso-configurator';
+import { AmericanoConfigurator } from './americano-configurator';
+import { CoffeeMachine } from "../application/coffee-machine";
+import { DomainError, DomainValidationError } from "../domain/errors/errors";
+
+export class ControlPanel {
+  private builder: RecipeBuilder;
+  private configurator: any;
+
+  constructor(private readonly coffeeMachine: CoffeeMachine) {}
+
+  createEspresso(): void {
+    console.log('[UI] Espresso button pressed');
+    this.builder = new RecipeBuilder();
+    this.builder.setTargetTemperatureC(80);
+    this.configurator = new EspressoConfigurator(this.builder);
+  }
+
+  createAmericano(): void {
+    console.log('[UI] Americano button pressed');
+    this.builder = new RecipeBuilder();
+    this.builder.setTargetTemperatureC(80);
+    this.configurator = new AmericanoConfigurator(this.builder);
+  }
+
+  increaseWater(): void {
+    console.log('[UI] Increase water');
+    this.configurator.increaseWater();
+  }
+
+  decreaseWater(): void {
+    console.log('[UI] Decrease water');
+    this.configurator.decreaseWater();
+  }
+
+  increaseStrength(): void {
+    console.log('[UI] Increase strength');
+    this.configurator.increaseStrength();
+  }
+
+  decreaseStrength(): void {
+    console.log('[UI] Decrease strength');
+    this.configurator.decreaseStrength();
+  }
+
+  prepareCoffee(): void {
+    console.log('[UI] Prepare coffee button pressed');
+    try {
+      const recipe = this.builder.build();
+      this.coffeeMachine.prepare(recipe);
+    } catch (error) {
+      if (error instanceof DomainValidationError) {
+        console.log('[UI] Invalid recipe:', error.message);
+        return;
+      }
+      if (error instanceof DomainError) {
+        console.log('[UI] Cannot prepare coffee:', error.message);
+        return;
+      }
+      throw error;
+    }
+  }
+}
+
+
+// File: ..\coffee-machine\hex\ui\espresso-configurator.ts
+// ----------------------------------------------------------------------
+import { StepRange } from './step-range';
+import { RecipeBuilder } from './recipe-builder';
+
+export class EspressoConfigurator {
+  private readonly strength: StepRange = new StepRange({
+    min: 1,
+    max: 7,
+    step: 1,
+    initial: 4
+  });
+  private readonly water: StepRange = new StepRange({
+    min: 80,
+    max: 160,
+    step: 20,
+    initial: 120
+  });
+
+  constructor(private readonly builder: RecipeBuilder) {
+    this.sync();
+  }
+
+  increaseStrength(): void {
+    this.strength.increase();
+    this.sync();
+  }
+
+  decreaseStrength(): void {
+    this.strength.decrease();
+    this.sync();
+  }
+
+  increaseWater(): void {
+    this.water.increase();
+    this.sync();
+  }
+
+  decreaseWater(): void {
+    this.water.decrease();
+    this.sync();
+  }
+
+  private sync(): void {
+    this.builder
+      .setCoffeeBeansAmountGrams(this.mapStrengthToBeans(this.strength.current))
+      .setWaterAmountMl(this.water.current);
+  }
+
+  private mapStrengthToBeans(level: number): number {
+    // простое соответствие UI → домен
+    return 12 + level * 2; // 1→14g, 7→26g
+  }
+}
+
+// File: ..\coffee-machine\hex\ui\models\step-range-params.ts
+// ----------------------------------------------------------------------
+export interface StepRangeParams {
+  min: number;
+  max: number;
+  step: number;
+  initial: number;
+}
+
+// File: ..\coffee-machine\hex\ui\recipe-builder.ts
+// ----------------------------------------------------------------------
+import { Recipe } from "../domain/recipe";
+
+export class RecipeBuilder {
+  private waterAmountMl: number = null;
+  private targetTemperatureC: number = null;
+  private coffeeBeansAmountGrams: number = null;
+
+  setWaterAmountMl(amountMl: number): this {
+    this.waterAmountMl = amountMl;
+    return this;
+  }
+
+  setTargetTemperatureC(tempC: number): this {
+    this.targetTemperatureC = tempC;
+    return this;
+  }
+
+  setCoffeeBeansAmountGrams(amountGrams: number): this {
+    this.coffeeBeansAmountGrams = amountGrams;
+    return this;
+  }
+
+  build(): Recipe {
+    if (
+      this.waterAmountMl === null ||
+      this.targetTemperatureC === null ||
+      this.coffeeBeansAmountGrams === null
+    ) {
+      throw new Error('Recipe is incomplete');
+    }
+
+    const recipe: Recipe = new Recipe(
+      this.waterAmountMl,
+      this.targetTemperatureC,
+      this.coffeeBeansAmountGrams
+    );
+    this.reset();
+    return recipe;
+  }
+
+  private reset(): void {
+    this.waterAmountMl = null;
+    this.targetTemperatureC = null;
+    this.coffeeBeansAmountGrams = null;
+  }
+}
+
+
+// File: ..\coffee-machine\hex\ui\step-range.ts
+// ----------------------------------------------------------------------
+import { StepRangeParams } from "./models/step-range-params";
+
+export class StepRange {
+  private value: number;
+  private readonly min: number;
+  private readonly max: number;
+  private readonly step: number;
+
+  constructor(params: StepRangeParams) {
+    this.min = params.min;
+    this.max = params.max;
+    this.step = params.step;
+    this.value = this.clamp(params.initial);
+  }
+
+  increase(): void {
+    this.value = this.clamp(this.value + this.step);
+  }
+
+  decrease(): void {
+    this.value = this.clamp(this.value - this.step);
+  }
+
+  get current(): number {
+    return this.value;
+  }
+
+  private clamp(value: number): number {
+    return Math.max(this.min, Math.min(this.max, value));
+  }
+}
+
+

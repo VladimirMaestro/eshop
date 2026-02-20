@@ -1,0 +1,59 @@
+<div class="page-container">
+  <aside class="sidebar">Sidebar
+    <div class="input-group mb-3">
+      <span class="input-group-text">$min</span>
+      <input name="priceMin" type="text" class="form-control" mask="00000" [(ngModel)]="priceMin">
+    </div>
+    <div class="input-group mb-3">
+      <span class="input-group-text">$max</span>
+      <input name="priceMax" type="text" class="form-control" mask="00000" [(ngModel)]="priceMax">
+    </div>
+
+    <div class="input-group mb-3">
+      <span class="input-group-text">rating min</span>
+      <input class="form-control"
+             name="ratingMin"
+             type="number"
+             min="1"
+             max="5"
+             step="1"
+             required
+             mask="0"
+             [(ngModel)]="ratingMin">
+    </div>
+    <button type="button" (click)="applyFilters()" class="btn btn-success">Apply filters</button>
+  </aside>
+  <main class="main">
+    <div *ngFor="let filterEntry of filterEntries">
+      <ng-container [ngSwitch]="filterEntry.key">
+        <div *ngSwitchCase="'minRating'" class="badge text-bg-info me-4">
+          <span>Rating MIN: {{ filterEntry.value }}</span>
+          <span class="remove-filter-btn" (click)="removeFilter(filterEntry)">X</span>
+        </div>
+        <div *ngSwitchCase="'minPrice'" class="badge text-bg-info me-4">
+          <span>Price MIN: {{ filterEntry.value }}</span>
+          <span class="remove-filter-btn" (click)="removeFilter(filterEntry)">X</span>
+        </div>
+        <div *ngSwitchCase="'maxPrice'" class="badge text-bg-info me-4">
+          <span>Price MAX: {{ filterEntry.value }}</span>
+          <span class="remove-filter-btn" (click)="removeFilter(filterEntry)">X</span>
+        </div>
+        <div *ngSwitchCase="'query'" class="badge text-bg-info me-4">
+          <span>Query: {{ filterEntry.value }}</span>
+          <span class="remove-filter-btn" (click)="removeFilter(filterEntry)">X</span>
+        </div>
+      </ng-container>
+    </div>
+
+    <app-products-list></app-products-list>
+
+    <app-pagination *ngIf="totalPages"
+                    [page]="currentPage"
+                    [total]="totalPages"
+                    [visiblePages]="10"
+                    (pageChange)="onPageChange($event)">
+    </app-pagination>
+  </main>
+</div>
+
+
