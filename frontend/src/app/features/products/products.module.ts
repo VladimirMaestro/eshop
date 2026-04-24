@@ -9,7 +9,9 @@ import { CatalogPage } from '@@app/pages/catalog/catalog.page';
 import { ProductPage } from '@@app/pages/product/product.page';
 import { PaginationComponent } from '@@app/shared/components/pagination/pagination.component';
 import { PRODUCTS_STORE } from '@@app/products/store/products-store.token';
-import { CustomStoreAdapter } from '@@app/products/store/impls/custom/custom-store.adapter';
+import { NgxsModule } from '@ngxs/store';
+import { NgxsProductsState } from '@@app/products/store/impls/ngxs/ngxs-products.state';
+import { NgXsStoreAdapter } from '@@app/products/store/impls/ngxs/ngxs-store.adapter';
 
 @NgModule({
   imports: [
@@ -22,7 +24,8 @@ import { CustomStoreAdapter } from '@@app/products/store/impls/custom/custom-sto
     NgSwitch,
     NgSwitchCase,
     PaginationComponent,
-    NgIf
+    NgIf,
+    NgxsModule.forFeature([NgxsProductsState])
   ],
   declarations: [
     ProductCardComponent,
@@ -31,7 +34,7 @@ import { CustomStoreAdapter } from '@@app/products/store/impls/custom/custom-sto
     ProductPage
   ],
   providers: [
-    { provide: PRODUCTS_STORE, useClass: CustomStoreAdapter }
+    { provide: PRODUCTS_STORE, useClass: NgXsStoreAdapter }
   ]
 })
 export class ProductsModule {}

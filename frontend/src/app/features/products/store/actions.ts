@@ -1,18 +1,9 @@
+import { ProductFilters, ProductsPagination } from '@@app/products/store/models';
 import { Action } from '@@app/sdk/store';
-import { Product, ProductFilters, ProductsPagination } from '@@app/products/store/models';
-
-export class SetProducts implements Action {
-  readonly type: string = '[Products] set products';
-  readonly products: Product[];
-
-  constructor(products: Product[]) {
-    this.products = products;
-  }
-}
 
 export class UpdateProductFilters implements Action {
-  readonly type: string = '[PRODUCTS] Update products filters';
-  readonly filters: Partial<ProductFilters>;
+  static readonly type: string = '[PRODUCTS] Update products filters';
+  filters: Partial<ProductFilters>;
 
   constructor(filters: Partial<ProductFilters>) {
     this.filters = filters;
@@ -20,7 +11,7 @@ export class UpdateProductFilters implements Action {
 }
 
 export class UpdateProductPage implements Action {
-  readonly type: string = '[PRODUCTS] Update products page';
+  static readonly type: string = '[PRODUCTS] Update products page';
   readonly page: Partial<ProductsPagination>;
 
   constructor(page: Partial<ProductsPagination>) {
@@ -28,10 +19,8 @@ export class UpdateProductPage implements Action {
   }
 }
 
-const upp = new UpdateProductPage({});
-
 export class SetProductsPageNumber implements Action {
-  readonly type: string = '[PRODUCTS] Set products page number';
+  static readonly type: string = '[PRODUCTS] Set products page number';
   readonly pageNumber: number;
 
   constructor(pageNumber: number) {

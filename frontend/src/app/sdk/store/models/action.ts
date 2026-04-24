@@ -1,3 +1,6 @@
-export interface Action {
-  readonly type: string;
+export interface ActionDef<TArgs extends any[] = any[], TReturn = any> {
+  type: string;
+  new (...args: TArgs): TReturn;
 }
+
+export interface Action {}

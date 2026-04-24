@@ -11,7 +11,6 @@ export interface Store<TState> {
 }
 
 
-
 // export abstract class FeatureStore<TState> implements Store<TState> {
 //   private initialState: TState;
 //   private state$: BehaviorSubject<TState>;

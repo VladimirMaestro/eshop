@@ -43,3 +43,18 @@ const obj = {
 }
 
 obj.getUser();
+
+
+const productState = {
+  pagination: {},
+};
+
+
+interface CartItem {
+  product: Product;
+  amount: number;
+}
+
+interface CartStateModel {
+  items: CartItem[];
+}
