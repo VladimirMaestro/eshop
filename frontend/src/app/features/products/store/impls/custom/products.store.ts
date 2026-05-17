@@ -79,7 +79,7 @@ export class ProductsStore {
 
   private getProductById(productId: string): Product | undefined {
     return this.state.pagination.items.find((product: Product) => {
-      return product.id === productId;
+      return String(product.id) === productId;
     });
   }
 }

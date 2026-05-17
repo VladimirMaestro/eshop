@@ -46,7 +46,7 @@ export class ProductsStoreFacade {
 
   getProductById$(productId: string): Observable<Product | undefined> {
     return this.store.select$<Product | undefined>((state: ProductsState) => {
-      return state.pagination.items.find((product: Product) => product.id === productId);
+      return state.pagination.items.find((product: Product) => String(product.id) === productId);
     });
   }
 }

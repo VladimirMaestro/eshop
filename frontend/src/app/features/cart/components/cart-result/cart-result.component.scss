@@ -1,0 +1,5 @@
+.cart-result-sticky {
+  position: sticky;
+  top: 0; /* Adjust this value if you have a fixed header */
+  z-index: 1020; /* Ensure it stays above other content if necessary */
+}

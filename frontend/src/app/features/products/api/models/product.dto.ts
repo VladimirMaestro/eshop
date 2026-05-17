@@ -3,7 +3,11 @@ import { Comment } from '@@app/models/comment';
 export interface ProductDto {
   id?: string;
   name: string;
+  description?: string;
   price: number;
-  rating: 0 | 1 | 2 | 3 | 4 | 5;
+  rating: number;
+  image?: string;
+  images?: string[];
+  features?: string[];
   comments: Comment[];
 }

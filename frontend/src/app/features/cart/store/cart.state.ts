@@ -24,7 +24,7 @@ export class CartState {
       [CartState],
       (state: CartStateModel) => {
         return state.items.find((item: CartItem) => {
-          return item.product.id === id;
+          return `${item.product.id}` === id;
         });
       }
     );
