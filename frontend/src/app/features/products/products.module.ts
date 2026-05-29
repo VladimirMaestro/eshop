@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { NgClass, NgFor, NgIf, NgSwitch, NgSwitchCase } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { NgxMaskDirective } from 'ngx-mask';
 import { RouterModule } from '@angular/router';
 import { ProductCardComponent } from '@@app/products/components/product-card/product-card.component';
@@ -15,16 +15,12 @@ import { NgXsStoreAdapter } from '@@app/products/store/impls/ngxs/ngxs-store.ada
 
 @NgModule({
   imports: [
-    NgFor,
-    NgClass,
+    CommonModule,
     ReactiveFormsModule,
     FormsModule,
     NgxMaskDirective,
     RouterModule,
-    NgSwitch,
-    NgSwitchCase,
     PaginationComponent,
-    NgIf,
     NgxsModule.forFeature([NgxsProductsState])
   ],
   declarations: [

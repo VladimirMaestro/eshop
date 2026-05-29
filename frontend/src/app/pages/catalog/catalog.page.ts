@@ -6,18 +6,12 @@ import { ProductsPagination } from '@@app/products/store/models/products-paginat
 import { ProductFilters } from '@@app/products/store/models/products-filters';
 import { Product } from '@@app/products/store/models/product';
 
-interface PriceInputStatus {
-  value: string,
-  cursor: number
-}
-
 @Component({
   standalone: false,
   templateUrl: 'catalog.page.html',
   styleUrls: ['catalog.page.scss']
 })
 export class CatalogPage implements OnInit {
-  private prevValues: { [key: string]: PriceInputStatus } = {};
   private productService: ProductService = inject(ProductService);
   private productsStoreFacade: ProductsStoreFacade = inject(ProductsStoreFacade);
 
@@ -45,6 +39,11 @@ export class CatalogPage implements OnInit {
       this.currentPage = pagination.page;
       this.totalPages = pagination.totalPages;
       this.filterEntries = this.getFilterEntries();
+
+      // Sync local input values with store filters
+      this.priceMin = pagination.filters.minPrice as number;
+      this.priceMax = pagination.filters.maxPrice as number;
+      this.ratingMin = pagination.filters.minRating as number;
     });
   }
 
@@ -72,5 +71,3 @@ export class CatalogPage implements OnInit {
     return filterEntries;
   }
 }
-
-

@@ -1,3 +1,72 @@
-.card {
+.product-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   margin-bottom: 24px;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  }
+
+  .product-image-bg {
+    background-color: #fcd34d; // Yellow background like in the image
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+  }
+
+  .product-image {
+    max-height: 100%;
+    width: auto;
+    object-fit: contain;
+    mix-blend-mode: multiply;
+  }
+
+  .description-truncate {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 2.5rem;
+  }
+
+  .btn-primary, .details-btn {
+    border-radius: 8px;
+    font-weight: 500;
+  }
+
+  .btn-primary {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+
+    &:hover {
+      background-color: #2563eb;
+      border-color: #2563eb;
+    }
+  }
+
+  .details-btn {
+    color: #3b82f6;
+    border-color: #3b82f6;
+
+    &:hover {
+      background-color: #eff6ff;
+      color: #2563eb;
+      border-color: #2563eb;
+    }
+  }
+
+  .star-icon {
+    font-size: 1.1rem;
+    margin-right: 1px;
+    color: #e5e7eb; // Default empty star color
+
+    &.filled {
+      color: #3b82f6; // Blueish filled star color to match design
+    }
+  }
 }

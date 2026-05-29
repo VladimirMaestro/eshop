@@ -1,56 +1,111 @@
-<div class="row">
-  <div class="col">
-    <img src="" alt="">
-  </div>
-  <div class="col">
-    <h1>{{ product?.name }}</h1>
-    <div>{{ product?.price }}</div>
-  </div>
-</div>
-<div class="row">
-  <div class="col">
-    <div class="new-comment-container">
-      <form [formGroup]="form">
-        <div class="mb-3">
-          <label for="fullName" class="form-label">Full name</label>
-          <input
-            type="text" class="form-control" id="fullName" formControlName="fullName"
-            [ngClass]="{ 'is-invalid': form.controls.fullName.touched && form.controls.fullName.invalid }">
-          <div class="invalid-feedback">
-            Please provide a valid full name.
-          </div>
-        </div>
-        <div class="mb-3">
-          <label for="comment" class="form-label">Comment</label>
-          <textarea
-            class="form-control" id="comment" rows="3" formControlName="comment"
-            [ngClass]="{ 'is-invalid': form.controls.comment.touched && form.controls.comment.invalid }">
-          </textarea>
-          <div class="invalid-feedback">
-            Please provide a valid comment.
-          </div>
-        </div>
-        <button class="btn btn-primary mb-3" (click)="addComment()">Add comment</button>
-      </form>
-    </div>
-    <div class="comments-container">
-      <div *ngFor="let comment of product?.comments" class="col">
-        <div class="card mb-4 rounded-3 shadow-sm">
-          <div class="card-header d-flex justify-content-between">
-            <h4 class="my-0 fw-normal">
-              {{ comment.author }} ({{ comment.createdAt }})
-            </h4>
-            <div class="actions">
-              <button class="btn btn-light">Like ({{comment.likes || 0}})</button>
-              <button class="btn btn-light">Dislike ({{comment.dislikes || 0}})</button>
-            </div>
-          </div>
-          <div class="card-body">
-            {{ comment.text }}
-          </div>
+<div class="container py-4" *ngIf="product">
+  <!-- Top Navigation -->
+  <nav class="mb-4">
+    <a routerLink="/catalog" class="text-decoration-none text-muted small">
+      &lt; Back to Catalog
+    </a>
+  </nav>
+
+  <div class="row g-5">
+    <!-- Left Column: Image Gallery -->
+    <div class="col-md-6">
+      <div class="bg-light rounded-3 overflow-hidden mb-3">
+        <img [src]="product.image" [alt]="product.name" class="img-fluid w-100 h-auto" style="min-height: 400px; object-fit: cover;">
+      </div>
+      <div class="d-flex gap-2">
+        <div *ngFor="let img of product.images; let i = index" 
+             class="bg-light rounded-2 overflow-hidden border" 
+             style="width: 100px; height: 100px; cursor: pointer;"
+             [class.border-primary]="i === 0" [class.border-2]="i === 0">
+          <img [src]="img" class="img-fluid w-100 h-100 object-fit-cover" alt="thumbnail">
         </div>
       </div>
     </div>
-  </div>
-</div>
 
+    <!-- Right Column: Product Details -->
+    <div class="col-md-6">
+      <h1 class="h3 fw-bold mb-1">{{ product.name }}</h1>
+      
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <div class="text-primary small">
+          <span class="text-primary">★</span><span class="text-primary">★</span><span class="text-primary">★</span><span class="text-primary">★</span><span class="text-muted opacity-25">★</span>
+        </div>
+        <span class="text-muted small">(4.5) 3 reviews</span>
+      </div>
+
+      <div class="h2 text-primary fw-bold mb-4">{{ product.price | currency }}</div>
+
+      <button class="btn btn-primary btn-lg w-100 py-3 mb-5 d-flex align-items-center justify-content-center gap-2 shadow-sm" (click)="addToCart()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-cart3" viewBox="0 0 16 16">
+          <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5M3.102 4l1.313 7h8.17l1.313-7zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4m7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4m-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2m7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
+        </svg>
+        Add to Cart
+      </button>
+
+      <div class="mb-4 border-top pt-4">
+        <h5 class="fw-bold mb-2">Description</h5>
+        <p class="text-muted small lh-lg">
+          {{ product.description || 'Experience superior sound quality with these premium wireless headphones. Featuring active noise cancellation, 30-hour battery life, and comfortable over-ear design. Perfect for music lovers and professionals alike.' }}
+        </p>
+      </div>
+
+      <div class="mb-5">
+        <h5 class="fw-bold mb-2">Features</h5>
+        <ul class="list-unstyled text-muted small">
+          <li *ngFor="let feature of product.features" class="mb-2">
+            <span class="me-2">•</span>{{ feature }}
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <hr class="my-5 opacity-10">
+
+  <!-- Reviews Section -->
+  <section class="mb-5">
+    <h3 class="fw-bold mb-4">Customer Reviews</h3>
+
+    <div class="card shadow-sm border border-light-subtle rounded-3">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-4">Write a Review</h5>
+        
+        <form [formGroup]="form">
+          <div class="mb-3">
+            <label class="form-label text-muted small fw-bold mb-1">Your Name</label>
+            <input type="text" class="form-control bg-light border-light-subtle" placeholder="Enter your name" formControlName="fullName"
+                   [ngClass]="{ 'is-invalid': form.controls.fullName.touched && form.controls.fullName.invalid }">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-muted small fw-bold mb-1 d-block">Rating</label>
+            <div class="text-muted opacity-25">
+              <span class="h4 me-1">★</span><span class="h4 me-1">★</span><span class="h4 me-1">★</span><span class="h4 me-1">★</span><span class="h4">★</span>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label text-muted small fw-bold mb-1">Comment</label>
+            <textarea class="form-control bg-light border-light-subtle" rows="4" placeholder="Share your thoughts about this product..." formControlName="comment"
+                      [ngClass]="{ 'is-invalid': form.controls.comment.touched && form.controls.comment.invalid }"></textarea>
+          </div>
+
+          <button class="btn btn-primary w-100 py-2 fw-bold" (click)="addComment()">
+            Submit Review
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Existing Reviews List -->
+    <div class="mt-5" *ngIf="product.comments?.length">
+      <div *ngFor="let comment of product.comments" class="mb-4 border-bottom pb-4">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h6 class="fw-bold mb-0">{{ comment.author }}</h6>
+          <span class="text-muted small">{{ comment.createdAt | date }}</span>
+        </div>
+        <p class="text-muted small mb-0">{{ comment.text }}</p>
+      </div>
+    </div>
+  </section>
+</div>
